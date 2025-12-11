@@ -298,7 +298,18 @@ class VHDLPortsDirective(VHDLEntityIOGenericDirective):
             raise ValueError(
                 f'Malformed port definition, must be in the form `name : mode type`, got {definition}'
             )
+            
+class VHDLProcessDirective(VHDLEntityIOGenericDirective):
+    has_content = True
+    required_arguments = 1
 
+    def handle_signature(self, sig: str, signode: desc_signature) -> ObjDescT:
+        signode += addnodes.desc_sig_keyword(text='PROCESS ')
+        signode += addnodes.desc_name(text=sig.split()[0])
+        signode += addnodes.desc_sig_keyword(text=' END ')
+        signode += addnodes.desc_name(text=sig.split()[1])
+        return sig
+    
 class VHDLConstantsDirective(VHDLEntityIOGenericDirective):
     id_title = 'genconstant'
     title = 'Constants'
@@ -572,7 +583,7 @@ class VHDLDomain(Domain):
         'record': VHDLRecordTypeDirective,
         'recordelem': VHDLRecordElementDirective,
         'type': VHDLGeneralTypeDirective,
-        'process' : VHDLProcessDirective,
+        'autoprocess' : VHDLAutoProcessDirective,
     }
     initial_data = {
         'types': [],
