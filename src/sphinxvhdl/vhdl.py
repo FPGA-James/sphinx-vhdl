@@ -431,6 +431,8 @@ class VHDLAutoFunctionDirective(VHDLFunctionDirective):
 
 
 class VHDLAutoProcessDirective(VHDLProcessDirective):
+    id_title = 'Processes'
+    title = 'Processes'
     def handle_signature(self, sig: str, signode: desc_signature) -> ObjDescT:
         init_autodoc(self.env.domains['vhdl'])
         identifier = get_closest_identifier(sig.lower(), list(autodoc.processes.items()))
@@ -645,5 +647,5 @@ def setup(app: Sphinx):
     logger.verbose('The sphinx-vhdl extension has been activated.')
 
     return {
-        'version': '0.2.2'
+        'version': '0.3.0'
     }
