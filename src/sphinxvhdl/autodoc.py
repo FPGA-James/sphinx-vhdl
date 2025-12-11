@@ -26,7 +26,7 @@ enums = {}
 enumvals = defaultdict(dict)
 types = {}
 functions = {}
-processes = {}
+processes = defaultdict(dict)
 
 # Function for parsing line comments
 def parse_inline_doc_or_print_error(current_doc, filename, line, lineno):
@@ -48,6 +48,7 @@ class ParseState(Enum):
     PACKAGE = auto()
     RECORD = auto()
     ENUM = auto()
+    PROC = auto()
 
 
 def init(path) -> None:
@@ -260,18 +261,17 @@ def init(path) -> None:
                     current_doc = []
 
                 elif line_lowercase.startswith('process') and line.split('--')[0].strip().endswith(';'):
+                    state = ParseState.PROC
                     parse_inline_doc_or_print_error(current_doc, filename, line, lineno)
                     return_type = '' if 'return' not in line else (line.split('return')[1].strip() + '.')
-                    functions[return_type + line_lowercase.split()[1]] = current_doc
+                    processes[return_type + line_lowercase.split()[1]] = current_doc
                     current_doc = []
 
                 # Signalization of the end of record
-                elif state is ParseState.ARCH_DECL and line_lowercase.startswith('end process'):
-                    if current_package != '':
-                        state = ParseState.ARCH_DECL
-                    else:
-                        state = None
+                elif state is ParseState.PROC and line_lowercase.startswith('end process'):
+                    state = None
                     current_doc = []
+                    
                 # Ignore others
                 else:
                     current_doc = []
