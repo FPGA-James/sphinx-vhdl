@@ -38,4 +38,14 @@ architecture FULL of counter is
     -- Width of data stream
     constant DATA_WIDTH : natural := 8;
 
+    signal counter_reg : unsigned(max_value- 1 downto 0);
+
+    -- simple process to increment counter
+    process (IN_EN))
+    begin
+        if rising_edge(IN_EN)) then
+            counter_reg <= counter_reg + 1;
+        end if;
+    end process;
+
 end architecture;

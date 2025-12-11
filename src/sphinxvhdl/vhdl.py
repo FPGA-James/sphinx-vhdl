@@ -419,6 +419,20 @@ class VHDLAutoFunctionDirective(VHDLFunctionDirective):
         return super().handle_signature(sig, signode)
 
 
+class VHDLAutoProcessDirective(VHDLProcessDirective):
+    def handle_signature(self, sig: str, signode: desc_signature) -> ObjDescT:
+        init_autodoc(self.env.domains['vhdl'])
+        identifier = get_closest_identifier(sig.lower(), list(autodoc.functions.items()))
+        if identifier is None:
+            logger.warning(f"SPHINX-VHDL: Function {sig.lower()} was not found in parsed VHDL files!", location=self.get_location())
+            self.content = StringList([f"SPHINX-VHDL: Function was not found in parsed VHDL files!"]) + self.content
+            sig = f'{sig.lower()} Unknown'
+        else:
+            self.content = self.content + StringList(['', ''] + identifier[1])
+            sig = f'{identifier[0].split(".")[-1]} {identifier[0].split(".")[0]}'
+
+        return super().handle_signature(sig, signode)
+
 class VHDLAutoEnumDirective(VHDLEnumTypeDirective):
     def handle_signature(self, sig: str, signode: desc_signature) -> ObjDescT:
         init_autodoc(self.env.domains['vhdl'])
@@ -558,6 +572,7 @@ class VHDLDomain(Domain):
         'record': VHDLRecordTypeDirective,
         'recordelem': VHDLRecordElementDirective,
         'type': VHDLGeneralTypeDirective,
+        'process' : VHDLProcessDirective,
     }
     initial_data = {
         'types': [],
@@ -568,6 +583,7 @@ class VHDLDomain(Domain):
             'genconstant': defaultdict(list),
             'parameters': defaultdict(list),
             'entity': defaultdict(list),
+            'process' : defaultdict(list),
         },
         'autodoc_initialized': False
     }
@@ -580,6 +596,7 @@ class VHDLDomain(Domain):
         'gengeneric': XRefRole(),
         'type': XRefRole(),
         'entity': XRefRole(),
+        'process' : XRefRole(),
     }
 
     def resolve_xref(self, env: "BuildEnvironment", fromdocname: str, builder: "Builder", typ: str, target: str,
@@ -594,6 +611,8 @@ class VHDLDomain(Domain):
             index = self.data['refs']['genconstant']
         elif typ == 'entity':
             index = self.data['refs']['entity']
+        elif typ == 'process':
+            index = self.data['refs']['process']
         elif True:
             raise NotImplementedError
         simple_name = target.split('.')[-1].lower()

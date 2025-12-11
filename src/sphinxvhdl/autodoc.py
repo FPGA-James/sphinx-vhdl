@@ -26,6 +26,7 @@ enums = {}
 enumvals = defaultdict(dict)
 types = {}
 functions = {}
+processes = {}
 
 # Function for parsing line comments
 def parse_inline_doc_or_print_error(current_doc, filename, line, lineno):
@@ -41,6 +42,7 @@ class ParseState(Enum):
     ARCH_DECL = auto()
     PORT = auto()
     CONST = auto()
+    PROCESS = auto()
     GROUPS = auto()
     GENERIC = auto()
     PACKAGE = auto()
@@ -118,6 +120,16 @@ def init(path) -> None:
 
                 # If line contains keyword constant and state is not generice then start to collecting constants
                 elif state == ParseState.ARCH_DECL and 'constant' in line_lowercase:
+                    parse_inline_doc_or_print_error(current_doc, filename, line, lineno)
+                    definition = line.split('--')[0].split(';')[0]
+                    if ':=' not in definition:
+                        definition += ':= UNDEFINED'
+                    definition = definition[8:].strip()
+                    constants[current_constant.lower()][definition] = current_doc
+                    current_doc = []
+                    
+                    
+                elif state == ParseState.ARCH_DECL and 'signal' in line_lowercase:
                     parse_inline_doc_or_print_error(current_doc, filename, line, lineno)
                     definition = line.split('--')[0].split(';')[0]
                     if ':=' not in definition:
@@ -247,6 +259,19 @@ def init(path) -> None:
                     functions[return_type + line_lowercase.split()[1]] = current_doc
                     current_doc = []
 
+                elif line_lowercase.startswith('process') and line.split('--')[0].strip().endswith(';'):
+                    parse_inline_doc_or_print_error(current_doc, filename, line, lineno)
+                    return_type = '' if 'return' not in line else (line.split('return')[1].strip() + '.')
+                    functions[return_type + line_lowercase.split()[1]] = current_doc
+                    current_doc = []
+
+                # Signalization of the end of record
+                elif state is ParseState.ARCH_DECL and line_lowercase.startswith('end process'):
+                    if current_package != '':
+                        state = ParseState.ARCH_DECL
+                    else:
+                        state = None
+                    current_doc = []
                 # Ignore others
                 else:
                     current_doc = []
