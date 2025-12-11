@@ -260,12 +260,11 @@ def init(path) -> None:
                     functions[return_type + line_lowercase.split()[1]] = current_doc
                     current_doc = []
 
-                elif line_lowercase.startswith('process') and line.split('--')[0].strip().endswith(';'):
-                    state = ParseState.PROC
-                    parse_inline_doc_or_print_error(current_doc, filename, line, lineno)
-                    return_type = '' if 'return' not in line else (line.split('return')[1].strip() + '.')
-                    processes[return_type + line_lowercase.split()[1]] = current_doc
+                elif line_lowercase.startswith('process') and ' is' in line_lowercase:               
+                    current_process = line.split()[1]
+                    processes[current_process.lower()] = current_doc
                     current_doc = []
+                    state = ParseState.PROC
 
                 # Signalization of the end of record
                 elif state is ParseState.PROC and line_lowercase.startswith('end process'):
