@@ -26,7 +26,7 @@ enums = {}
 enumvals = defaultdict(dict)
 types = {}
 functions = {}
-processes = defaultdict(dict)
+processes = {}
 
 # Function for parsing line comments
 def parse_inline_doc_or_print_error(current_doc, filename, line, lineno):

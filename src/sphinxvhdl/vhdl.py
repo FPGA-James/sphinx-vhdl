@@ -433,10 +433,10 @@ class VHDLAutoFunctionDirective(VHDLFunctionDirective):
 class VHDLAutoProcessDirective(VHDLProcessDirective):
     def handle_signature(self, sig: str, signode: desc_signature) -> ObjDescT:
         init_autodoc(self.env.domains['vhdl'])
-        identifier = get_closest_identifier(sig.lower(), list(autodoc.functions.items()))
+        identifier = get_closest_identifier(sig.lower(), list(autodoc.processes.items()))
         if identifier is None:
-            logger.warning(f"SPHINX-VHDL: Function {sig.lower()} was not found in parsed VHDL files!", location=self.get_location())
-            self.content = StringList([f"SPHINX-VHDL: Function was not found in parsed VHDL files!"]) + self.content
+            logger.warning(f"SPHINX-VHDL: Process {sig.lower()} was not found in parsed VHDL files!", location=self.get_location())
+            self.content = StringList([f"SPHINX-VHDL: Process was not found in parsed VHDL files!"]) + self.content
             sig = f'{sig.lower()} Unknown'
         else:
             self.content = self.content + StringList(['', ''] + identifier[1])
